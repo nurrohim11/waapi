@@ -27,7 +27,7 @@ app.use(express.json());
   });
 
   const savedSession = await db.readSession()
-
+  console.log('save ',savedSession)
   const client = new Client({
     restartOnAuthFail: true,
     puppeteer: {
@@ -176,6 +176,34 @@ app.use(express.json());
       })
     })
     .catch(err=>{
+      res.status(500).json({
+        status:500,
+        response:err
+      })
+    })
+  })
+
+  // send media
+  app.post('/send_media',async(req, res)=>{
+    const number = phoneNumberFormatter(req.body.nomor)
+    const message = req.body.message
+    const image = req.body.image
+
+    let mimetype
+    const attachment = await axios.get(image,{responseType:'arraybuffer'}).then(response=>{
+      mimetype = response.headers['content-type']
+      return response.data.toString('base64')
+    })
+    const media = new MessageMedia(mimetype, attachment, 'image')
+    client.sendMessage(number, media, {caption:message})
+    .then((response)=>{
+      res.status(200).json({
+        status:200,
+        response:'Message berhasil dikirim ke '+req.body.nomor
+      })
+    })
+    .catch(err=>{
+      console.log(err)
       res.status(500).json({
         status:500,
         response:err
