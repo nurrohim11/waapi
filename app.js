@@ -199,7 +199,7 @@ app.use(express.json());
     .then((response)=>{
       res.status(200).json({
         status:200,
-        response:'Message berhasil dikirim ke '+req.body.nomor
+        response:response
       })
     })
     .catch(err=>{
